@@ -1,8 +1,9 @@
 /* TODO 
-
-
+grab unique urls relating to same video bytes into an array
+be able to send those urls to an api
 
 */
+console.log("hello");
 
 interface Headers {
     acceptRanges: string;
@@ -18,10 +19,11 @@ interface NetworkResponseReceivedParams {
       headers: Headers;
     };
 }
+let videoUrls: Set<string> = new Set<string>();
   
   chrome.action.onClicked.addListener(function (tab) {
     if (tab.url?.startsWith('http') && tab.id !== undefined) {
-      //console.log('Valid tab detected. URL:', tab.url, 'Tab ID:', tab.id);
+      console.log('Valid tab detected. URL:', tab.url, 'Tab ID:', tab.id);
   
       chrome.debugger.detach({ tabId: tab.id }, function () {
         if (chrome.runtime.lastError) {
@@ -34,7 +36,7 @@ interface NetworkResponseReceivedParams {
           if (chrome.runtime.lastError) {
             //console.error('Debugger attach error:', chrome.runtime.lastError.message);
           } else {
-            //console.log('Debugger successfully attached to tab:', tab.id);
+            console.log('Debugger successfully attached to tab:', tab.id);
   
             chrome.debugger.sendCommand(
               { tabId: tab.id },
@@ -62,16 +64,17 @@ interface NetworkResponseReceivedParams {
   
       const { response } = params as NetworkResponseReceivedParams;
       if (!response) {
-        //console.warn('No response object in event params:', params);
+        console.warn('No response object in event params:', params);
         return;
       }
  
       if (response.headers.contentType === "video/mp4") {
 
       }
-
-      if ( (response.url.startsWith("https://scontent-lga3-2.cdninstagram.com/")) && response.url.includes('.mp4')) {
-        console.log('MP4 file detected:', response.url);
+      if ( (response.url.startsWith("https://scontent")) && response.url.includes('.mp4')) {
+        videoUrls.add(response.url);
+        console.log('MP4 file detected:', response.url, response.headers.contentLength, response.headers.contentType, response.headers.acceptRanges);
+        console.log(videoUrls);
       } else {
         //console.log('Response is not an MP4 file. URL:', response.url);
       }

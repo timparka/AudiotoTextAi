@@ -1,13 +1,15 @@
 "use strict";
 /* TODO
-
-
+grab unique urls relating to same video bytes into an array
+be able to send those urls to an api
 
 */
+console.log("hello");
+let videoUrls = new Set();
 chrome.action.onClicked.addListener(function (tab) {
     var _a;
     if (((_a = tab.url) === null || _a === void 0 ? void 0 : _a.startsWith('http')) && tab.id !== undefined) {
-        //console.log('Valid tab detected. URL:', tab.url, 'Tab ID:', tab.id);
+        console.log('Valid tab detected. URL:', tab.url, 'Tab ID:', tab.id);
         chrome.debugger.detach({ tabId: tab.id }, function () {
             if (chrome.runtime.lastError) {
                 //console.warn('No existing debugger to detach:', chrome.runtime.lastError.message);
@@ -20,7 +22,7 @@ chrome.action.onClicked.addListener(function (tab) {
                     //console.error('Debugger attach error:', chrome.runtime.lastError.message);
                 }
                 else {
-                    //console.log('Debugger successfully attached to tab:', tab.id);
+                    console.log('Debugger successfully attached to tab:', tab.id);
                     chrome.debugger.sendCommand({ tabId: tab.id }, 'Network.enable', {}, function () {
                         if (chrome.runtime.lastError) {
                             //console.error('Network.enable error:', chrome.runtime.lastError.message);
@@ -42,20 +44,22 @@ chrome.debugger.onEvent.addListener(function (source, method, params) {
         //console.log('Network.responseReceived event detected. Params:', params);
         const { response } = params;
         if (!response) {
-            //console.warn('No response object in event params:', params);
+            console.warn('No response object in event params:', params);
             return;
         }
         if (response.headers.contentType === "video/mp4") {
         }
-        if ((response.url.startsWith("https://scontent-lga3-2.cdninstagram.com/")) && response.url.includes('.mp4')) {
-            console.log('MP4 file detected:', response.url);
+        if ((response.url.startsWith("https://scontent")) && response.url.includes('.mp4')) {
+            videoUrls.add(response.url);
+            console.log('MP4 file detected:', response.url, response.headers.contentLength, response.headers.contentType, response.headers.acceptRanges);
+            console.log(videoUrls);
         }
         else {
-            console.log('Response is not an MP4 file. URL:', response.url);
+            //console.log('Response is not an MP4 file. URL:', response.url);
         }
     }
     else {
-        console.log('Unhandled method:', method);
+        //console.log('Unhandled method:', method);
     }
 });
 //# sourceMappingURL=background.js.map
